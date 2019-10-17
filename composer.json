@@ -6,6 +6,10 @@
         {
             "name": "Lars Steen",
             "email": "lats@aarhus.dk"
+        },
+        {
+            "name": "Mikkel Ricky",
+            "email": "rimi@aarhus.dk"
         }
     ],
     "autoload": {
