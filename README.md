@@ -1,7 +1,7 @@
 # ITK Development - User bundle
 
-User bundle overrides the templates in the [FOSUserBundle](https://github.com/FriendsOfSymfony/FOSUserBundle) with styles
-often used in projects developed in ITK Development.
+User bundle overrides the templates in the [FOSUserBundle](https://github.com/FriendsOfSymfony/FOSUserBundle) so it uses
+Bootstrap 4 styles.
 
 ## Getting started
 
@@ -22,7 +22,7 @@ composer config repositories.itk-dev/user-bundle path bundles/user-bundle
 composer require itk-dev/user-bundle:dev-develop
 ```
 
-Configure the FOSUserBundle as described [here](https://github.com/FriendsOfSymfony/FOSUserBundle/blob/master/Resources/doc/index.rst).
+Follow the [instructions found here](doc/configuration.md) to configure the bundle.
 
 ## Running the tests
 
@@ -41,12 +41,19 @@ composer config repositories.itk-dev/user-bundle vcs https://github.com/itk-dev/
 composer require itk-dev/user-bundle
 ```
 
+Follow the [instructions found here](doc/configuration.md) to configure the bundle.
+
+## Documentation
+
+See the [doc](doc) folder for documentation.
+
 ## Contributing
 
 ### Pull Request Process
 
 1. Update the README.md with details of changes that are relevant.
-2. You may merge the Pull Request in once you have the sign-off of one other developer, or if you 
+2. Add or update documentation files in the doc folder if needed.
+3. You may merge the Pull Request in once you have the sign-off of one other developer, or if you 
    do not have permission to do that, you may request the reviewer to merge it for you.
 
 ## Versioning
