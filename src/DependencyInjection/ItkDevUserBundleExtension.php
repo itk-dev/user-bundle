@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of itk-dev/user-bundle.
  *
@@ -6,6 +7,7 @@
  *
  * This source file is subject to the MIT license.
  */
+
 namespace ItkDev\UserBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
