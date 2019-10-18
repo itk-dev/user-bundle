@@ -10,13 +10,13 @@
 
 namespace ItkDev\UserBundle;
 
-use ItkDev\UserBundle\DependencyInjection\ItkDevUserBundleExtension;
+use ItkDev\UserBundle\DependencyInjection\ItkDevUserExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class ItkDevUserBundle extends Bundle
 {
     public function getContainerExtension()
     {
-        return new ItkDevUserBundleExtension();
+        return new ItkDevUserExtension();
     }
 }

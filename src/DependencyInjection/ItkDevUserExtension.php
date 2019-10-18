@@ -10,12 +10,14 @@
 
 namespace ItkDev\UserBundle\DependencyInjection;
 
+use ItkDev\UserBundle\Doctrine\UserManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class ItkDevUserBundleExtension extends Extension implements PrependExtensionInterface
+class ItkDevUserExtension extends Extension implements PrependExtensionInterface
 {
     public function prepend(ContainerBuilder $container)
     {
@@ -30,6 +32,12 @@ class ItkDevUserBundleExtension extends Extension implements PrependExtensionInt
 
     public function load(array $configs, ContainerBuilder $builder)
     {
-        // Nothing here
+        $loader = new YamlFileLoader($builder, new FileLocator(\dirname(__DIR__).'/Resources/config'));
+        $loader->load('services.yaml');
+
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+        $definition = $builder->getDefinition(UserManager::class);
+        $definition->replaceArgument('$configuration', $config);
     }
 }
