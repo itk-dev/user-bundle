@@ -1,0 +1,14 @@
+services:
+    ItkDev\UserBundle\Doctrine\UserManager:
+        class: ItkDev\UserBundle\Doctrine\UserManager
+        arguments:
+            $passwordUpdater: '@fos_user.util.password_updater'
+            $canonicalFieldsUpdater: '@fos_user.util.canonical_fields_updater'
+            $om: '@fos_user.object_manager'
+            $class: '%fos_user.model.user.class%'
+            $tokenGenerator: '@fos_user.util.token_generator'
+            $twig: '@twig'
+            $router: '@router'
+            $userMailer: '@fos_user.mailer'
+            $mailer: '@mailer'
+            $configuration: ''
