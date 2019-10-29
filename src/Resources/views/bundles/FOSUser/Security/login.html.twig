@@ -9,9 +9,8 @@
     <div class="has-error">
       <p class="error-block">
         <span class="label label-danger">
-          {{ 'errors'|transchoice(1, domain = 'EasyAdminBundle') }}
+            {{ error.messageKey|trans(error.messageData, 'security') }}
         </span>
-        {{ error.messageKey|trans(error.messageData, 'security') }}
       </p>
     </div>
   {% endif %}
