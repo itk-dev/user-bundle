@@ -37,7 +37,6 @@ composer apply-coding-standards
 ## Deployment
 
 ```bash
-composer config repositories.itk-dev/user-bundle vcs https://github.com/itk-dev/user-bundle
 composer require itk-dev/user-bundle
 ```
 
