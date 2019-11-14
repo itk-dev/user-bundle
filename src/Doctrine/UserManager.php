@@ -130,7 +130,7 @@ class UserManager extends BaseUserManager
         $buttonText = $this->twig->createTemplate($config['button']['text'])->render($context);
         $footer = $this->twig->createTemplate($config['footer'])->render($context);
 
-        $body = $this->twig->render('@ItkDevUserManagement/email/user/user_created_user.html.twig', [
+        $body = $this->twig->render('@ItkDevUser/email/user/user_created_user.html.twig', [
             'reset_password_url' => $url,
             'header' => $header,
             'message' => $message,
