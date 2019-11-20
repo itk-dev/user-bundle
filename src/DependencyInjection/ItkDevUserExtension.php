@@ -23,10 +23,18 @@ class ItkDevUserExtension extends Extension implements PrependExtensionInterface
     {
         $fileLocator = new FileLocator(\dirname(__DIR__));
 
+        $projectTemplatesPath = $container->getParameter('kernel.project_dir').'/templates/bundles';
+        $paths = [
+            $fileLocator->locate('Resources/views/bundles/FOSUser') => 'FOSUser',
+        ];
+
+        if (is_dir($projectTemplatesPath.'/FOSUserBundle')) {
+            // Allow project to overwrite bundle templates.
+            $paths = array_merge([$projectTemplatesPath.'/FOSUserBundle' => 'FOSUser'], $paths);
+        }
+
         $container->loadFromExtension('twig', [
-            'paths' => [
-                $fileLocator->locate('Resources/views/bundles/FOSUser') => 'FOSUser',
-            ],
+            'paths' => $paths,
         ]);
     }
 
