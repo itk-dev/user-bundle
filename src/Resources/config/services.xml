@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults public="false" />
+
+        <service id="ItkDev\UserBundle\EventSubscriber\UserSubscriber" class="ItkDev\UserBundle\EventSubscriber\UserSubscriber">
+            <argument key="$configuration"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="ItkDev\UserBundle\Command\UserListCommand">
+            <argument type="service" id="ItkDev\UserBundle\Util\UserManager"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="ItkDev\UserBundle\Command\AddRoleCommand">
+            <argument type="service" id="ItkDev\UserBundle\Util\UserManager"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="ItkDev\UserBundle\Command\RemoveRoleCommand">
+            <argument type="service" id="ItkDev\UserBundle\Util\UserManager"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="ItkDev\UserBundle\Util\UserManager">
+            <argument type="service" id="security.password_encoder"/>
+            <argument type="service" id="doctrine.orm.entity_manager"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="security.role_hierarchy"/>
+            <argument key="$configuration"/>
+        </service>
+
+    </services>
+</container>

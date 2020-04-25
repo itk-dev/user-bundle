@@ -8,81 +8,82 @@
  * This source file is subject to the MIT license.
  */
 
-namespace ItkDev\UserBundle\Doctrine;
+namespace ItkDev\UserBundle\Util;
 
-use Doctrine\Common\Persistence\ObjectManager;
-use FOS\UserBundle\Doctrine\UserManager as BaseUserManager;
-use FOS\UserBundle\Mailer\MailerInterface;
-use FOS\UserBundle\Model\User;
-use FOS\UserBundle\Model\UserInterface;
-use FOS\UserBundle\Util\CanonicalFieldsUpdater;
-use FOS\UserBundle\Util\PasswordUpdaterInterface;
-use FOS\UserBundle\Util\TokenGeneratorInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+use ItkDev\UserBundle\Exception\UserNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Twig\Environment;
 
-class UserManager extends BaseUserManager
+class UserManager //extends BaseUserManager
 {
-    /** @var \FOS\UserBundle\Util\TokenGeneratorInterface */
-    private $tokenGenerator;
+    /** @var UserPasswordEncoderInterface */
+    private $passwordEncoder;
 
-    /** @var \Twig_Environment */
+    /** @var EntityManagerInterface */
+    private $entityManager;
+
+    /** @var Environment */
     private $twig;
 
-    /** @var \Symfony\Component\Routing\RouterInterface */
+    /** @var RouterInterface */
     private $router;
 
-    /** @var \FOS\UserBundle\Mailer\MailerInterface */
-    private $userMailer;
+    /** @var RoleHierarchyInterface */
+    private $roleHierarchy;
 
-    /** @var \Swift_Mailer */
-    private $mailer;
-
-    /** @var ContainerInterface */
+    /** @var array */
     private $configuration;
 
     public function __construct(
-        PasswordUpdaterInterface $passwordUpdater,
-        CanonicalFieldsUpdater $canonicalFieldsUpdater,
-        ObjectManager $om,
-        string $class,
-        TokenGeneratorInterface $tokenGenerator,
+        UserPasswordEncoderInterface $passwordEncoder,
+        EntityManagerInterface $entityManager,
         Environment $twig,
         RouterInterface $router,
-        MailerInterface $userMailer,
-        \Swift_Mailer $mailer,
+        RoleHierarchyInterface $roleHierarchy,
         array $configuration
     ) {
-        parent::__construct($passwordUpdater, $canonicalFieldsUpdater, $om, $class);
-        $this->tokenGenerator = $tokenGenerator;
+        $this->passwordEncoder = $passwordEncoder;
+        $this->entityManager = $entityManager;
         $this->twig = $twig;
         $this->router = $router;
-        $this->userMailer = $userMailer;
-        $this->mailer = $mailer;
+        $this->roleHierarchy = $roleHierarchy;
         $this->configuration = $configuration;
     }
 
-    public function createUser()
+    public function find(string $username): ?UserInterface
     {
-        $user = parent::createUser();
-        $user->setPlainPassword(uniqid('', true));
-        $user->setEnabled(true);
+        return $this->entityManager->getRepository($this->getUserClass())->findOneBy(['username' => $username]);
+    }
+
+    public function createUser(): UserInterface
+    {
+        $user = new $this->configuration['class']();
 
         return $user;
     }
 
+    public function getRoles(): array
+    {
+        return $this->roleHierarchy->getReachableRoleNames([$this->getSuperAdminRole()]);
+    }
+
     public function updateUser(UserInterface $user, $andFlush = true)
     {
-        $isNew = null === $user->getId();
-        $user->setUsername($user->getEmail());
-        parent::updateUser($user, $andFlush);
-
-        if ($isNew && $this->getNotifyUserOnCreate()) {
-            // @TODO: Add flash bag message here?
-            $this->notifyUserCreated($user);
+        $this->entityManager->persist($user);
+        if ($andFlush) {
+            $this->entityManager->flush();
         }
+//
+//        if ($isNew && $this->getNotifyUserOnCreate()) {
+//            // @TODO: Add flash bag message here?
+//            $this->notifyUserCreated($user);
+//        }
     }
 
     public function getNotifyUserOnCreate()
@@ -113,10 +114,10 @@ class UserManager extends BaseUserManager
         $sender = $this->configuration['sender'];
         $config = $this->configuration['user_created'];
         $context = [
-                'reset_password_url' => $url,
-                'user' => $user,
-                'sender' => $sender,
-            ]
+            'reset_password_url' => $url,
+            'user' => $user,
+            'sender' => $sender,
+        ]
             + $this->configuration['user_created']
             + $this->configuration;
 
@@ -160,8 +161,73 @@ class UserManager extends BaseUserManager
         $this->userMailer->sendResettingEmailMessage($user);
     }
 
+    public function setRoles(UserInterface $user, array $roles): UserInterface
+    {
+        if (!method_exists($user, 'setRoles')) {
+            throw new \RuntimeException('Cannot set roles on user');
+        }
+        $user->setRoles($roles);
+
+        return $user;
+    }
+
+    public function getSuperAdminRole(): string
+    {
+        return 'ROLE_SUPER_ADMIN';
+    }
+
+    public function addRoles(UserInterface $user, array $roles): UserInterface
+    {
+        $roles = array_unique(array_merge($user->getRoles(), $roles));
+
+        return $this->setRoles($user, $roles);
+    }
+
+    public function removeRoles(UserInterface $user, array $roles): UserInterface
+    {
+        $roles = array_unique(array_diff($user->getRoles(), $roles));
+
+        return $this->setRoles($user, $roles);
+    }
+
+    public function findUserByUsername(string $username, bool $mustExist): ?UserInterface
+    {
+        $user = $this->getRepository()->findOneBy([$this->getUsernameField() => $username]);
+        if ($mustExist && null === $user) {
+            throw new UserNotFoundException(sprintf('User with username %s does not exist', $username));
+        }
+
+        return $user;
+    }
+
+    public function findUserBy(array $criteria): ?UserInterface
+    {
+        return $this->getRepository()->findOneBy($criteria);
+    }
+
+    /**
+     * @param null $limit
+     * @param null $offset
+     *
+     * @return array|UserInterface[]
+     */
     public function findUsersBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
     {
         return $this->getRepository()->findBy($criteria, $orderBy, $limit, $offset);
+    }
+
+    private function getRepository()
+    {
+        return $this->entityManager->getRepository($this->getUserClass());
+    }
+
+    private function getUserClass()
+    {
+        return $this->configuration['user_class'];
+    }
+
+    private function getUsernameField()
+    {
+        return $this->configuration['username_field'];
     }
 }

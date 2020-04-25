@@ -23,6 +23,9 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('itk_dev_user');
         $treeBuilder->getRootNode()
             ->children()
+            ->scalarNode('user_class')->defaultValue('App\Entity\User')->end()
+            ->scalarNode('username_field')->defaultValue('email')->end()
+
             ->scalarNode('site_url')->isRequired()->defaultValue('%env(SITE_URL)%')->end()
             ->scalarNode('site_name')->isRequired()->example('%env(SITE_NAME)%')->end()
 

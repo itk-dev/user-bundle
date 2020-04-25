@@ -10,12 +10,12 @@
 
 namespace ItkDev\UserBundle\DependencyInjection;
 
-use ItkDev\UserBundle\Doctrine\UserManager;
+use ItkDev\UserBundle\Util\UserManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 class ItkDevUserExtension extends Extension implements PrependExtensionInterface
 {
@@ -23,15 +23,21 @@ class ItkDevUserExtension extends Extension implements PrependExtensionInterface
     {
         $fileLocator = new FileLocator(\dirname(__DIR__));
 
-        $projectTemplatesPath = $container->getParameter('kernel.project_dir').'/templates/bundles';
-        $paths = [
-            $fileLocator->locate('Resources/views/bundles/FOSUser') => 'FOSUser',
+        $templatePaths = [
+            '' => null,
+            'bundles/FOSUser' => 'FOSUser',
         ];
 
-        if (is_dir($projectTemplatesPath.'/FOSUserBundle')) {
-            // Allow project to overwrite bundle templates.
-            $paths = array_merge([$projectTemplatesPath.'/FOSUserBundle' => 'FOSUser'], $paths);
+        $projectTemplatesPath = $container->getParameter('kernel.project_dir').'/templates';
+        foreach ($templatePaths as $path => $name) {
+            if (is_dir($projectTemplatesPath.'/'.$path)) {
+                // Allow project to overwrite bundle templates.
+                $paths[$projectTemplatesPath.'/'.$path] = $name;
+            }
+            $paths[$fileLocator->locate('Resources/views/'.$path)] = $name;
         }
+
+//        header('content-type: text/plain'); echo var_export($paths, true); die(__FILE__.':'.__LINE__.':'.__METHOD__);
 
         $container->loadFromExtension('twig', [
             'paths' => $paths,
@@ -40,8 +46,8 @@ class ItkDevUserExtension extends Extension implements PrependExtensionInterface
 
     public function load(array $configs, ContainerBuilder $builder)
     {
-        $loader = new YamlFileLoader($builder, new FileLocator(\dirname(__DIR__).'/Resources/config'));
-        $loader->load('services.yaml');
+        $loader = new XmlFileLoader($builder, new FileLocator(\dirname(__DIR__).'/Resources/config'));
+        $loader->load('services.xml');
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
