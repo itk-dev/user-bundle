@@ -10,7 +10,7 @@
 
 namespace ItkDev\UserBundle\Command;
 
-use ItkDev\UserBundle\Util\UserManager;
+use ItkDev\UserBundle\User\UserManager;
 use Symfony\Component\Console\Command\Command;
 
 abstract class UserCommand extends Command

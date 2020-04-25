@@ -20,9 +20,11 @@
     "require": {
         "php": "^7.0",
         "twig/twig": "^2.12",
-        "symfony/console": "^4.3 || ^5.0",
-        "symfony/security": "^4.3 || ^5.0",
-        "doctrine/orm": "*"
+        "symfony/console": "^4.4 || ^5.0",
+        "symfony/security": "^4.4 || ^5.0",
+        "symfony/property-access":  "^4.4 || ^5.0",
+        "doctrine/orm": "*",
+        "symfonycasts/reset-password-bundle": "^1.1"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.15",

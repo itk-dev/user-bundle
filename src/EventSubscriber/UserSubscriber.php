@@ -10,31 +10,43 @@
 
 namespace ItkDev\UserBundle\EventSubscriber;
 
+use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
+use ItkDev\UserBundle\User\UserManager;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class UserSubscriber implements EventSubscriberInterface
+class UserSubscriber implements EventSubscriber
 {
-    /** @var array */
-    private $configuration;
+    /** @var UserManager */
+    private $userManager;
 
-    public function __construct(array $configuration)
+    public function __construct(UserManager $userManager)
     {
-        $resolver = new OptionsResolver();
-        $this->configureOptions($resolver);
-
-        $this->configuration = $configuration;
+        $this->userManager = $userManager;
     }
 
-    public static function getSubscribedEvents()
+    public function getSubscribedEvents()
     {
         return [
-            Events::postPersist => 'postPersist',
+            Events::postPersist,
+            Events::postUpdate,
         ];
     }
 
-    public function postPersist(array $event)
+    public function postPersist(LifecycleEventArgs $args)
     {
+        $object = $args->getObject();
+        if ($object instanceof UserInterface) {
+            $this->userManager->userCreated($object);
+        }
+    }
+
+    public function postUpdate(LifecycleEventArgs $args)
+    {
+        $object = $args->getObject();
+        if ($object instanceof UserInterface) {
+            $this->userManager->userUpdated($object);
+        }
     }
 }

@@ -1,0 +1,24 @@
+{% extends '@ItkDevUser/email/user/layout.html.twig' %}
+
+{% block email_title %}{{ header is defined ? header|raw }}{% endblock %}
+
+{% block header %}
+    {{ header is defined ? header|raw }}
+{% endblock %}
+
+{% block body %}
+    {{ message|default(false) ? message|raw }}
+    {{ body is defined ? body|raw }}
+{% endblock %}
+
+{#{% set reset_password_url = url('app_reset_password', {token: resetToken.token}) %}#}
+{#    This link will expire in {{ tokenLifetime|date('g') }} hour(s)..#}
+
+{% set button = {
+    url: reset_password_url,
+    text: button.text|default('Hmm …')
+} %}
+
+{% block footer %}
+    {{ footer is defined ? footer|raw }}
+{% endblock %}

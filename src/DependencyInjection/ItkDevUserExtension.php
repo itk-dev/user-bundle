@@ -10,7 +10,7 @@
 
 namespace ItkDev\UserBundle\DependencyInjection;
 
-use ItkDev\UserBundle\Util\UserManager;
+use ItkDev\UserBundle\User\UserManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;

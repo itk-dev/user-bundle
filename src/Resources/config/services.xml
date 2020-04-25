@@ -7,33 +7,48 @@
     <services>
         <defaults public="false" />
 
-        <service id="ItkDev\UserBundle\EventSubscriber\UserSubscriber" class="ItkDev\UserBundle\EventSubscriber\UserSubscriber">
-            <argument key="$configuration"/>
-            <tag name="kernel.event_subscriber"/>
+        <service id="ItkDev\UserBundle\EventSubscriber\UserSubscriber">
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
+            <tag name="doctrine.event_subscriber"/>
         </service>
 
         <service id="ItkDev\UserBundle\Command\UserListCommand">
-            <argument type="service" id="ItkDev\UserBundle\Util\UserManager"/>
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="ItkDev\UserBundle\Command\UserCreateCommand">
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="ItkDev\UserBundle\Command\UserPasswordCommand">
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
             <tag name="console.command"/>
         </service>
 
         <service id="ItkDev\UserBundle\Command\AddRoleCommand">
-            <argument type="service" id="ItkDev\UserBundle\Util\UserManager"/>
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
             <tag name="console.command"/>
         </service>
 
         <service id="ItkDev\UserBundle\Command\RemoveRoleCommand">
-            <argument type="service" id="ItkDev\UserBundle\Util\UserManager"/>
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
             <tag name="console.command"/>
         </service>
 
-        <service id="ItkDev\UserBundle\Util\UserManager">
+        <service id="ItkDev\UserBundle\User\UserManager">
             <argument type="service" id="security.password_encoder"/>
             <argument type="service" id="doctrine.orm.entity_manager"/>
             <argument type="service" id="twig"/>
+            <argument type="service" id="mailer.mailer"/>
             <argument type="service" id="router"/>
             <argument type="service" id="security.role_hierarchy"/>
             <argument key="$configuration"/>
+            <!-- Injecting symfonycasts.reset_password.helper generates an infinite loop -->
+            <call method="setResetPasswordHelper">
+                <argument type="service" id="symfonycasts.reset_password.helper"/>
+            </call>
         </service>
 
     </services>
