@@ -14,7 +14,7 @@ There are multiple ways you could set up this project for development. Typically
 Install the ITK Development user-bundle:
 
 ```bash
-# Clone the code to a place e.g. inside your Symfony 
+# Clone the code to a place e.g. inside your Symfony
 git clone git@github.com:itk-dev/user-bundle.git bundles/user-bundle
 
 # Install it with Composer
@@ -52,13 +52,19 @@ See the [doc](doc) folder for documentation.
 
 1. Update the README.md with details of changes that are relevant.
 2. Add or update documentation files in the doc folder if needed.
-3. You may merge the Pull Request in once you have the sign-off of one other developer, or if you 
+3. You may merge the Pull Request in once you have the sign-off of one other developer, or if you
    do not have permission to do that, you may request the reviewer to merge it for you.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/itk-dev/user-bundle/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/itk-dev/user-bundle/tags).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Testing
+
+```sh
+./vendor/bin/simple-phpunit
+```

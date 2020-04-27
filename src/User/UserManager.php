@@ -10,6 +10,7 @@
 
 namespace ItkDev\UserBundle\User;
 
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
 use InvalidArgumentException;
@@ -22,7 +23,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserInterface as CoreUserInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 use Twig\Environment;
 
@@ -75,30 +76,40 @@ class UserManager
         $this->configuration = $configuration;
     }
 
-    public function createUser(string $username): UserInterface
+    public function createUser(string $username = null): CoreUserInterface
     {
-        if (null !== $this->findUserByUsername($username, false)) {
-            throw new InvalidArgumentException(sprintf('User with username %s already exists', $username));
-        }
         $class = $this->getUserClass();
-        /** @var UserInterface $user */
+        /** @var CoreUserInterface $user */
         $user = new $class();
-        $this
-            ->setField($user, $this->getUsernameField(), $username)
-            ->setPassword(uniqid('', true));
+        $this->setPassword($user, uniqid('', true));
+
+        if (null !== $username) {
+            if (null !== $this->findUserByUsername($username, false)) {
+                throw new InvalidArgumentException(sprintf('User with username %s already exists', $username));
+            }
+            $user->setField($user, $this->getUsernameField(), $username);
+        }
 
         return $user;
     }
 
-    public function userCreated(UserInterface $user)
+    public function userCreated(CoreUserInterface $user)
     {
         if ($this->getNotifyUserOnCreate()) {
             $this->notifyUserCreated($user);
         }
     }
 
-    public function userUpdated(UserInterface $user)
+    public function userUpdated(CoreUserInterface $user)
     {
+    }
+
+    public function userLoggedIn(CoreUserInterface $user)
+    {
+        if ($user instanceof \ItkDev\UserBundle\User\UserInterface) {
+            $user->setLastLoggedInAt(new DateTimeImmutable());
+            $this->updateUser($user);
+        }
     }
 
     public function getRoles(): array
@@ -106,7 +117,7 @@ class UserManager
         return $this->roleHierarchy->getReachableRoleNames([$this->getSuperAdminRole()]);
     }
 
-    public function updateUser(UserInterface $user, $andFlush = true)
+    public function updateUser(CoreUserInterface $user, $andFlush = true)
     {
         $this->entityManager->persist($user);
         if ($andFlush) {
@@ -119,7 +130,7 @@ class UserManager
         return $this->configuration['notify_user_on_create'];
     }
 
-    public function notifyUserCreated(UserInterface $user, $andFlush = true, array $options = [])
+    public function notifyUserCreated(CoreUserInterface $user, $andFlush = true, array $options = [])
     {
         if (null !== $this->resetPasswordHelper && $this->getNotifyUserOnCreate()) {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
@@ -174,7 +185,7 @@ class UserManager
         }
     }
 
-//    private function createUserCreatedMessage(UserInterface $user, ResetPasswordToken $token, array $options = [])
+//    private function createUserCreatedMessage(CoreUserInterface $user, ResetPasswordToken $token, array $options = [])
 //    {
 //        $url = $this->router->generate('fos_user_resetting_reset', [
 //            'token' => $user->getConfirmationToken(),
@@ -235,12 +246,12 @@ class UserManager
         return $this->setField($user, 'password', $this->passwordEncoder->encodePassword($user, $password));
     }
 
-    public function setRoles(UserInterface $user, array $roles): UserInterface
+    public function setRoles(CoreUserInterface $user, array $roles): CoreUserInterface
     {
         return $this->setField($user, 'roles', $roles);
     }
 
-    private function setField(UserInterface $user, string $field, $value): UserInterface
+    private function setField(CoreUserInterface $user, string $field, $value): CoreUserInterface
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         if (!$propertyAccessor->isWritable($user, $field)) {
@@ -256,21 +267,21 @@ class UserManager
         return 'ROLE_SUPER_ADMIN';
     }
 
-    public function addRoles(UserInterface $user, array $roles): UserInterface
+    public function addRoles(CoreUserInterface $user, array $roles): CoreUserInterface
     {
         $roles = array_unique(array_merge($user->getRoles(), $roles));
 
         return $this->setRoles($user, $roles);
     }
 
-    public function removeRoles(UserInterface $user, array $roles): UserInterface
+    public function removeRoles(CoreUserInterface $user, array $roles): CoreUserInterface
     {
         $roles = array_unique(array_diff($user->getRoles(), $roles));
 
         return $this->setRoles($user, $roles);
     }
 
-    public function findUserByUsername(string $username, bool $mustExist = true): ?UserInterface
+    public function findUserByUsername(string $username, bool $mustExist = true): ?CoreUserInterface
     {
         $user = $this->getRepository()->findOneBy([$this->getUsernameField() => $username]);
         if ($mustExist && null === $user) {
@@ -280,7 +291,7 @@ class UserManager
         return $user;
     }
 
-    public function findUserBy(array $criteria): ?UserInterface
+    public function findUserBy(array $criteria): ?CoreUserInterface
     {
         return $this->getRepository()->findOneBy($criteria);
     }
@@ -289,7 +300,7 @@ class UserManager
      * @param null $limit
      * @param null $offset
      *
-     * @return array|UserInterface[]
+     * @return array|CoreUserInterface[]
      */
     public function findUsersBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
     {

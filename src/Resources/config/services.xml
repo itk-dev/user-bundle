@@ -12,6 +12,11 @@
             <tag name="doctrine.event_subscriber"/>
         </service>
 
+        <service id="ItkDev\UserBundle\EventSubscriber\SecuritySubscriber">
+            <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="ItkDev\UserBundle\Command\UserListCommand">
             <argument type="service" id="ItkDev\UserBundle\User\UserManager"/>
             <tag name="console.command"/>
