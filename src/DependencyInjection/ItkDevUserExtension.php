@@ -37,8 +37,6 @@ class ItkDevUserExtension extends Extension implements PrependExtensionInterface
             $paths[$fileLocator->locate('Resources/views/'.$path)] = $name;
         }
 
-//        header('content-type: text/plain'); echo var_export($paths, true); die(__FILE__.':'.__LINE__.':'.__METHOD__);
-
         $container->loadFromExtension('twig', [
             'paths' => $paths,
         ]);
