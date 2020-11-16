@@ -132,7 +132,7 @@ class UserManager
 
     public function notifyUserCreated(CoreUserInterface $user, $andFlush = true, array $options = [])
     {
-        if (null !== $this->resetPasswordHelper && $this->getNotifyUserOnCreate()) {
+        if (null !== $this->resetPasswordHelper) {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
             $url = $this->router->generate('app_reset_password', [
                 'token' => $resetToken->getToken(),
