@@ -1,0 +1,55 @@
+{% trans_default_domain easyadmin_config('translation_domain') %}
+{% extends easyadmin_config('design.templates.layout') %}
+
+{% block title %}{{ 'Reset your password'|trans }}{% endblock %}
+
+{% block body_class 'page-login reset-password' %}
+
+{% set is_create = app.request.get('create')|default(false) %}
+
+{% block wrapper_wrapper %}
+  <div class="login-wrapper">
+    <header class="main-header mb-4">
+      <div id="header-logo">
+        {% block header_logo %}
+          <a class="logo {{ easyadmin_config('site_name')|length > 14 ? 'logo-long' }}" title="{{ easyadmin_config('site_name')|striptags }}" href="{{ path('easyadmin') }}">
+            {{ easyadmin_config('site_name')|raw }}
+          </a>
+        {% endblock header_logo %}
+      </div>
+    </header>
+    {% if error|default(false) %}
+      <div class="w-100 alert alert-danger">
+        {{ error.messageKey|trans(error.messageData, 'security') }}
+      </div>
+    {% endif %}
+    <section class="content">
+      {% form_theme form '@EasyAdmin/form/bootstrap_4.html.twig' %}
+      {{ form_start(form) }}
+
+        <div class="form-group field-password field-password-first">
+            <label for="password" class="sr-only form-control-label required">{{ password_label }}</label>
+            <div class="form-widget form-widget-with-icon">
+                <i class="fa fa-fw fa-lock"></i>
+                {{ form_widget(form.plainPassword.first, {id: 'password', attr: {placeholder: password_label}}) }}
+                {{ form_errors(form.plainPassword.first) }}
+            </div>
+        </div>
+
+        <div class="form-group field-password field-password-second">
+            <label for="password_repeat" class="sr-only form-control-label required">{{ password_repeat_label }}</label>
+            <div class="form-widget form-widget-with-icon">
+                <i class="fa fa-fw fa-lock"></i>
+                {{ form_widget(form.plainPassword.second, {id: 'password_repeat', attr: {placeholder: password_repeat_label}}) }}
+            </div>
+        </div>
+
+        <div class="form-group field-button">
+            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                {{ (is_create ? 'resetting.create.submit' : 'resetting.reset.submit')|trans }}
+            </button>
+        </div>
+      {{ form_end(form) }}
+    </section>
+  </div>
+{% endblock %}
