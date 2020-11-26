@@ -179,8 +179,6 @@ class UserManager
                 ])
             ;
 
-//                header('content-type: text/plain'); echo var_export($email->getBody(), true); die(__FILE__.':'.__LINE__.':'.__METHOD__);
-
             $this->mailer->send($email);
         }
     }
