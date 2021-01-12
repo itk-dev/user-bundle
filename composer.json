@@ -26,6 +26,7 @@
         "php": "^7.0",
         "doctrine/orm": "*",
         "symfony/console": "^4.4 || ^5.0",
+        "symfony/mailer": "^4.4 || ^5.0",
         "symfony/property-access":  "^4.4 || ^5.0",
         "symfony/security-bundle": "^4.4 || ^5.0",
         "symfonycasts/reset-password-bundle": "^1.1",
