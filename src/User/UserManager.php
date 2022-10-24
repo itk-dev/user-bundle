@@ -87,7 +87,7 @@ class UserManager
             if (null !== $this->findUserByUsername($username, false)) {
                 throw new InvalidArgumentException(sprintf('User with username %s already exists', $username));
             }
-            $user->setField($user, $this->getUsernameField(), $username);
+            $this->setField($user, $this->getUsernameField(), $username);
         }
 
         return $user;
